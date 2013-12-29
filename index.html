@@ -1,0 +1,19 @@
+<html>
+	<head>
+		<title>Minesweeper</title>
+		<!-- keep globals at top -->
+		<script src="globals.js"></script>
+		<script src="tile.js"></script>
+		<script src="board.js"></script>
+		<script src="game.js"></script>
+		<!-- new scripts above here -->
+		<script src="main.js"></script>
+		<!-- keep main at bottom -->
+	</head>
+
+	<body onload="startGame()" >
+		<h1>Minesweeper</h1>
+		<canvas style="display:block; border:1px solid #000;" width="1280" height="720" id="canvas" onclick="clickEvent()"></canvas>
+	</body>
+
+</html>
