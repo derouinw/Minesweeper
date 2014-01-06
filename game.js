@@ -7,6 +7,7 @@ function GameController() {
 	this.handleClick = handleClick;
 	
 	function load() {
+		console.log("loading");
 		// Board setup
 		board = new Board(BOARD_SIZE.WIDTH, BOARD_SIZE.HEIGHT);
 		board.setupTiles();
@@ -22,6 +23,7 @@ function GameController() {
 	}
 
 	function main() {
+		console.log(state);
 		// main loop
 		switch(state) {
 		case GameState.LOAD:
@@ -31,11 +33,19 @@ function GameController() {
 		case GameState.PLAY:
 			// yay we're playing
 			board.draw();
+			if (board.checkWin()) {
+				alert("You win");
+				state = GameState.WIN;
+			}
+			break;
+		case GameState.WIN:
+			board.draw();
 			break;
 		}
 	}
 
-	function handleClick(mx, my) {
-		board.handleClick(mx, my);
+	function handleClick(mx, my, e) {
+		if (state == GameState.PLAY) board.handleClick(mx, my, e);
+		else alert("Press any key to start over");
 	}
 }

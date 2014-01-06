@@ -30,10 +30,32 @@ function getMouse() {
     return mouseLoc;
 }
 
-function clickEvent() {
+function clickEvent(e) {
+    if (!e) e = window.event;
 	var mouseLoc = getMouse();
 	// when the click comes you better be ready
 	var x = Math.floor(mouseLoc._mx / TILE_SIZE);
 	var y = Math.floor(mouseLoc._my / TILE_SIZE);
-	controller.handleClick(x, y);
+	controller.handleClick(x, y, e);
+    return false;
 }
+
+if (document.addEventListener) {
+    document.addEventListener('contextmenu', function(e) {
+        clickEvent(e);
+        e.preventDefault();
+    }, false);
+} else {
+    document.attachEvent('oncontextmenu', function() {
+        clickEvent(e);
+        window.event.returnValue = false;
+    });
+}
+
+document.addEventListener('keydown', function(e) {
+    if (state == GameState.PLAY) board.solve();
+    else {
+        board.reset();
+        state = GameState.PLAY;
+    }
+}, false);

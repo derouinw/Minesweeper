@@ -4,6 +4,7 @@ function Board(iWidth, iHeight) {
 	this.width = iWidth;
 	this.height = iHeight;
 	this.tiles = new Array();
+	this.numMines = 0;
 
 	// functions
 	this.setupTiles = setupTiles;
@@ -11,6 +12,10 @@ function Board(iWidth, iHeight) {
 	this.draw = draw;
 	this.handleClick = handleClick;
 	this.printTiles = printTiles;
+	this.checkWin = checkWin;
+	this.solve = solve;
+	this.reset = reset;
+	this.flagged = flagged;
 
 	function setupTiles() {
 		for (var y = 0; y < this.height; y++) {
@@ -51,6 +56,7 @@ function Board(iWidth, iHeight) {
 				if (x < this.width-1) {
 					if (this.tiles[y*this.width + (x+1)].isMine) numNeighbors++; // right
 				}
+				if (this.tiles[y*this.width].isMine && x == this.width-1 && y != 0) numNeighbors--; // if theres a mine on the far left on the same row, it loops around to the right; dont ask i dont know
 				this.tiles[y*this.width + x].neighbors = numNeighbors;
 			}
 		}
@@ -62,8 +68,9 @@ function Board(iWidth, iHeight) {
 		ctx.save();
 
 		// Use the identity matrix while clearing the canvas
-		ctx.setTransform(1, 0, 0, 1, 0, 0);
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		//ctx.setTransform(1, 0, 0, 1, 0, 0);
+		//ctx.clearRect(0, 0, canvas.width, canvas.height);
+		canvas.width = canvas.width;
 
 		// Restore the transform
 		ctx.restore();
@@ -76,11 +83,14 @@ function Board(iWidth, iHeight) {
 		}
 	}
 
-	function handleClick(clickX, clickY) { 
-		console.log("x: " + clickX + ", y: " + clickY);
+	function handleClick(clickX, clickY, e) { 
+		//console.log("x: " + clickX + ", y: " + clickY + ", button: " + e.button);
 
-		if (clickX >= 0 && clickY >= 0 && clickX < this.width && clickY < this.height && this.tiles[clickY*this.width + clickX].revealed == false) this.tiles[clickY*this.width + clickX].click(clickX, clickY);
-		else console.log("gotcha!");
+		if (e.button == LEFT) {
+			if (clickX >= 0 && clickY >= 0 && clickX < this.width && clickY < this.height && this.tiles[clickY*this.width + clickX].revealed == false) this.tiles[clickY*this.width + clickX].click(clickX, clickY);
+		} else if (e.button == RIGHT) {
+			if (clickX >= 0 && clickY >= 0 && clickX < this.width && clickY < this.height) this.tiles[clickY*this.width + clickX].rightClick(clickX, clickY, e);
+		}
 	}
 
 	function printTiles() {
@@ -91,5 +101,32 @@ function Board(iWidth, iHeight) {
 		}
 	}
 
+	function checkWin() {
+		if (this.numMines < NUM_MINES) return false;
+		for (var i = 0; i < this.width*this.height; i++) {
+			if (this.tiles[i].isMine != this.tiles[i].flagged) return false;
+		}
+		return true;
+	}
 
+	function solve() {
+		for (var i = 0; i < this.width*this.height; i++) {
+			if (this.tiles[i].isMine) {
+			 	this.tiles[i].flagged = true;
+			 	this.numMines++;
+			} else this.tiles[i].revealed = true;
+		}
+	}
+
+	function reset() {
+		for (var i = 0; i < this.width*this.height; i++) {
+			this.tiles[i].reset();
+		}
+		this.numMines = 0;
+		this.plantMines(NUM_MINES);
+	}
+
+	function flagged(x, y) {
+		if (x >= 0 && x < this.width && y >= 0 && y < this.height) return this.tiles[y*this.width + x].flagged;
+	}
 };
